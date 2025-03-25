@@ -1,0 +1,103 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+id              String    @id @default(uuid())
+name            String    @db.VarChar(100)
+userName        String    @unique @db.VarChar(50)
+email           String    @unique @db.VarChar(255)
+emailVerifiedAt DateTime?
+password        String    @db.VarChar(255)
+surname         String    @db.VarChar(100)
+identityNo      String?   @db.VarChar(20)
+avatarImage     String?   @db.VarChar(255)
+
+// Social media fields
+socialInstagram                 String? @db.VarChar(100)
+socialInstagramBroadcastChannel String? @db.VarChar(100)
+socialFacebook                  String? @db.VarChar(100)
+socialFacebookGroup             String? @db.VarChar(100)
+socialFacebookPage              String? @db.VarChar(100)
+socialYoutube                   String? @db.VarChar(100)
+socialTiktok                    String? @db.VarChar(100)
+socialLinkedin                  String? @db.VarChar(100)
+socialX                         String? @db.VarChar(100)
+socialWhatsappTelNo             String? @db.VarChar(20)
+socialWhatsappGroup             String? @db.VarChar(100)
+socialWhatsappChannel           String? @db.VarChar(100)
+socialTelegramUsername          String? @db.VarChar(100)
+socialTelegramGroup             String? @db.VarChar(100)
+socialTelegramChannel           String? @db.VarChar(100)
+socialReddit                    String? @db.VarChar(100)
+socialRedditCommunity           String? @db.VarChar(100)
+
+// Contact information
+phoneNo String? @db.VarChar(20)
+
+// Role
+role   Role   @relation(fields: [roleId], references: [id])
+roleId String
+
+// Two-factor authentication
+twoFactorSecret String?   // For TOTP secret
+twoFactorEnabled Boolean  @default(false)
+
+refreshToken    String?   // Hashed refresh token`
+
+// OAuth fields
+githubId    String? @db.VarChar(100)
+googleId    String? @db.VarChar(100)
+facebookId  String? @db.VarChar(100)
+instagramId String? @db.VarChar(100)
+
+// IP tracking
+registerIp     String? @db.VarChar(45)
+lastLoggedInIp String? @db.VarChar(45)
+
+// Audit columns
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+isActive  Boolean  @default(true)
+
+@@index([email])
+@@index([userName])
+}
+
+model Role {
+id          String       @id @default(uuid())
+name        String       @unique // e.g., "developer", "shopkeeper", "staff", "customer"
+permissions Permission[] @relation("RolePermissions")
+users       User[]
+created_at DateTime  @default(now())
+updated_at DateTime? @updatedAt()
+deleted_at DateTime? @db.Timestamp()
+}
+
+model Permission {
+id      String @id @default(uuid())
+action  String // e.g., "manage", "read", "update"
+subject String // e.g., "all", "staff", "customer"
+roles   Role[] @relation("RolePermissions")
+
+inverted   Boolean @default(false)
+conditions Json?   @db.JsonB()
+reason     String? @db.Text()
+
+created_at DateTime  @default(now())
+updated_at DateTime? @updatedAt()
+deleted_at DateTime? @db.Timestamp()
+
+}
